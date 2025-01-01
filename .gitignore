@@ -1,0 +1,7 @@
+# Ignore comp files
+*.o
+*.exe
+*.out
+
+# Ignore config files
+.vscode/
