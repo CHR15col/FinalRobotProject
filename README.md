@@ -2,7 +2,10 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-- H test was a success code needs to now be modified to read from a text file to generate G-code
+- H test was a success
+- I have added a debug header file that acts as a debug mode, similar to serial.c comment out DEBUG_MODE to reduce executionables and memory overhead
+- slight modification to font.h, font.c and main.c as a result of debug.h file
+- code needs to now be modified to read from a text file to generate G-code
 ## Plan:
   1. Modify the Program to Read Text from a File
      - Prompt the user to input the name of the text file.
