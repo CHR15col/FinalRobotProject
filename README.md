@@ -2,7 +2,25 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-- An initial trial of a main.c to test g-code generation and communicate commands to robot
+- H test was a success code needs to now be modified to read from a text file to generate G-code
+## Plan:
+  1. Modify the Program to Read Text from a File
+     - Prompt the user to input the name of the text file.
+     - Open the file and read its contents.
+     - Process the text word by word.
+  2. Implement Word Wrapping
+     - Ensure that words fit within the 100mm width constraint.
+     - If a word exceeds the remaining space on the current line, move it to the next line.
+  3. Generate G-Code for Each Word
+     - For each character in the word:
+     - Retrieve its font data from memory.
+     - Scale the movements based on the user-defined height.
+     - Apply the X-offset for each character.
+     - For each word:
+       - Apply the Y-offset if the word is moved to a new line.
+  4. Handle Line Breaks
+     - Handle LF (ASCII 10) and CR (ASCII 13) characters in the text file to move to the next line.
+  5. Finalise the Program
 
 # main.c outline:
   - Define max/min height
