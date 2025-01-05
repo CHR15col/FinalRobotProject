@@ -2,23 +2,33 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-- implement font.h into font parsing source code - font.c
+- An initial trial of a main.c to test g-code generation and communicate commands to robot
 
- ## font.h functions:
+# main.c outline:
+  - Define max/min height
+  - Declare SendCommands(), get_text_height() and initialize_robot()
 
-   # Main functional declarations:
-   - load_font_file() 
-   - print_gcode_for_character()
-   # Debug functional declarations (testing purposes):
-   - debug_log()
-   - print_movement()
-   - print_character_data()
-   - print_font_data()
+## main():
+  1. Initialize serial communication
+  2. Wake up robot
+  3. Load font file
+  4. Get text height from user
+  5. Initialize robot
+  6. Print a character test ('H')
+  7. Return to origin and pen up
+  8. Close com port
+  9. End
+
+## Functions:
+  - Define get_text_height() - Gets text height from user with validation
+  - Define initialize_robot() - Follows the skeleton file, sends required startup commands
+  - Define SendCommands() - Sends commands to the robot
+
 
 # font.c outline:
   - Declare global array function - font_data[]
 
-## Debugging
+## Debugging functions:
   - Define debug_log function to print "[DEBUG] comment":
      - The use of a log will allow one function to be used with different args and formats
      - As the function is used, progressive comments can be printed to display debug info
@@ -44,6 +54,4 @@ Computer Engineering and Mechatronics project for controlling a writing robot.
   
   
 ## Next Steps
-- Develop test system in main.c to validate parsing
 - Add text file processing
-- Develop G-code generation
