@@ -6,8 +6,8 @@
 #include "font.h"
 #include "debug.h"
 
-#define MIN_HEIGHT 4.0
-#define MAX_HEIGHT 10.0
+#define MIN_HEIGHT 4.0f
+#define MAX_HEIGHT 10.0f
 
 void SendCommands(char *buffer);
 float get_text_height(void);
@@ -16,17 +16,20 @@ void initialize_robot(void);
 int main() {
     float text_height, scale_factor;
     char buffer[100];
+    char text_filename[256];
 
-    DEBUG_LOG("Starting robot writer program\n");
+    DEBUG_LOG("Starting Robot Writer program\n");
 
     // Initialize serial communication
     if (CanRS232PortBeOpened() == -1) {
+        DEBUG_LOG("Error: Unable to open the COM port\n");
         printf("\nUnable to open the COM port (specified in serial.h)\n");
         return -1;
     }
 
     // Wake up the robot
     DEBUG_LOG("Waking up robot\n");
+    printf("\nAbout to wake up the robot\n");
     sprintf(buffer, "\n");
     PrintBuffer(buffer);
     Sleep(100);
@@ -35,6 +38,7 @@ int main() {
 
     // Load font file
     if (load_font_file("SingleStrokeFont.txt") == -1) {
+        DEBUG_LOG("Error: Failed to load font file\n");
         printf("Failed to load font file\n");
         CloseRS232Port();
         return -1;
@@ -48,9 +52,12 @@ int main() {
     // Initialize robot
     initialize_robot();
 
-    // Test print a character (e.g., 'H')
-    DEBUG_LOG("Testing with character 'H'\n");
-    print_gcode_for_character('H', scale_factor, 0.0, 0.0);
+    // Get text file name from user
+    printf("Enter the name of the text file to process: ");
+    scanf("%s", text_filename);
+
+    // Process text file
+    process_text_file(text_filename, scale_factor);
 
     // Return to origin and pen up before finishing
     DEBUG_LOG("Returning to origin\n");
@@ -63,7 +70,6 @@ int main() {
     CloseRS232Port();
     DEBUG_LOG("COM port closed\n");
     printf("Program completed successfully\n");
-
     return 0;
 }
 
@@ -77,6 +83,7 @@ float get_text_height(void) {
                    MIN_HEIGHT, MAX_HEIGHT);
         }
     } while (height < MIN_HEIGHT || height > MAX_HEIGHT);
+
     DEBUG_LOG("Text height set to: %.2f mm\n", height);
     return height;
 }

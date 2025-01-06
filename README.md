@@ -2,59 +2,43 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-- defined the new font.h function prototypes in font.c
-  - update to the font.c outline
-- added two function prototypes to font.h:
-  - get_character_width():
-    - Will allow identification of max positive x coord using scaling logic 
-  - process_text_file() 
-    - This function should cover the majority of the plan
-    - Open text file
-    - Read file by word 
-    - calculate word width by using get_character_width()
-    - check if new line is needed -> if yes, apply new line logic
-    - print each character in the word applying offset logic by using print_gcode_for_character()
-    - add space between words
+  - main.c logic implemented using functions in font.c
+  - debug.h updated to carryout approprate checks throughout program
 
-
-## Plan:
-  1. Modify the Program to Read Text from a File
-     - Prompt the user to input the name of the text file.
-     - Open the file and read its contents.
-     - Process the text word by word.
-  2. Implement Word Wrapping
-     - Ensure that words fit within the 100mm width constraint.
-     - If a word exceeds the remaining space on the current line, move it to the next line.
-  3. Generate G-Code for Each Word
-     - For each character in the word:
-     - Retrieve its font data from memory.
-     - Scale the movements based on the user-defined height.
-     - Apply the X-offset for each character.
-     - For each word:
-       - Apply the Y-offset if the word is moved to a new line.
-  4. Handle Line Breaks
-     - Handle LF (ASCII 10) and CR (ASCII 13) characters in the text file to move to the next line.
-  5. Finalise the Program
 
 # main.c outline:
-  - Define max/min height
-  - Declare SendCommands(), get_text_height() and initialize_robot()
+## Initialisation:
+  - Initialise any required variables and settings
+  - Include debug.h
 
-## main():
-  1. Initialize serial communication
-  2. Wake up robot
-  3. Load font file
-  4. Get text height from user
-  5. Initialize robot
-  6. Print a character test ('H')
-  7. Return to origin and pen up
-  8. Close com port
-  9. End
+## Load Font File:
+  - Attempts to load the font file (SingleStrokeFont.txt) using the load_font_file function
+  - If the font file cannot be loaded, the program exits with an error message
 
-## Functions:
-  - Define get_text_height() - Gets text height from user with validation
-  - Define initialize_robot() - Follows the skeleton file, sends required startup commands
-  - Define SendCommands() - Sends commands to the robot
+## User Input for Text Height:
+  - The user is prompted to input the desired text height (in mm)
+  - The input is validated to ensure it falls within the allowed range (4mm to 10mm)
+  - The scale factor is calculated based on the ratio of the input height to the default font height (18 units)
+
+## Process Text File:
+  - The program processes the input text file (Test.txt) using the process_text_file function
+  - Handles word wrapping, line spacing, and G-code generation for the robot
+  - After processing and G-code generation, return the pen to origin (0,0), pen-up 
+
+# main.c flowchart:
+
+A[Start] --> B[Load font file]
+    B --> C{Font file loaded?}
+    C -- No --> D[Exit with error]
+    C -- Yes --> E[Prompt user for text height]
+    E --> F{Valid height?}
+    F -- No --> G[Exit with error]
+    F -- Yes --> H[Calculate scale factor]
+    H --> I[Process text file]
+    I --> J[Return pen to origin]
+    J --> K[Print completion message]
+    K --> L[Exit]
+
 
 
 # font.c outline:
@@ -96,6 +80,7 @@ Computer Engineering and Mechatronics project for controlling a writing robot.
     9. Generate G-code for each character
     10. Update x offset for character spacing
   11. Add word spacing after each word
+
   
 ## Next Steps
-add text file processing functionality to main.c
+streamline code where possible
