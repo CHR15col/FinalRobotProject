@@ -2,10 +2,19 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-- H test was a success
-- I have added a debug header file that acts as a debug mode, similar to serial.c comment out DEBUG_MODE to reduce executionables and memory overhead
-- slight modification to font.h, font.c and main.c as a result of debug.h file
-- code needs to now be modified to read from a text file to generate G-code
+- added two function prototypes to font.h:
+  - get_character_width():
+    - Will allow identification of max positive x coord using scaling logic 
+  - process_text_file() 
+    - This function should cover the majority of the plan
+    - Open text file
+    - Read file by word 
+    - calculate word width by using get_character_width()
+    - check if new line is needed -> if yes, apply new line logic
+    - print each character in the word applying offset logic by using print_gcode_for_character()
+    - add space between words
+
+
 ## Plan:
   1. Modify the Program to Read Text from a File
      - Prompt the user to input the name of the text file.
