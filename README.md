@@ -2,6 +2,8 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
+- defined the new font.h function prototypes in font.c
+  - update to the font.c outline
 - added two function prototypes to font.h:
   - get_character_width():
     - Will allow identification of max positive x coord using scaling logic 
@@ -58,14 +60,6 @@ Computer Engineering and Mechatronics project for controlling a writing robot.
 # font.c outline:
   - Declare global array function - font_data[]
 
-## Debugging functions:
-  - Define debug_log function to print "[DEBUG] comment":
-     - The use of a log will allow one function to be used with different args and formats
-     - As the function is used, progressive comments can be printed to display debug info
-  - Define debug_print_movement() - Print movement data for debugging
-  - Define debug_print_character_data() - Print character data for debugging
-  - Define debug_print_font_data() - Print all font data for debugging
-
 ## Font Parsing (including debugging):
   1. Load font data from file
      2. Initiallise all characters with 0 movements
@@ -81,7 +75,27 @@ Computer Engineering and Mechatronics project for controlling a writing robot.
         4. Change pen state if needed
         5. Move to position
   6. End
-  
+
+## Calculate scaled character width
+  1. Check if ASCII code is within valid range 
+    2. Return 0 if invalid
+  3. Iterate through all movements for the character
+    4. Track maximum x-coordinate reached
+    5. Scale the x-coordinates using scale_factor
+      6. Return the maximum scaled x-coordinate
+
+## text file processing
+  1. Open text file
+  2. Set up positioning variables and constants
+  3. Calculate line spacing based on text height
+  4. Read word by word from file
+    5. Calculate total width of current word
+    6. Check if word fits on current line
+      7. Handle line wrapping if needed
+  8. Process each character in the word
+    9. Generate G-code for each character
+    10. Update x offset for character spacing
+  11. Add word spacing after each word
   
 ## Next Steps
-- Add text file processing
+add text file processing functionality to main.c
