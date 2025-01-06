@@ -137,42 +137,54 @@ void process_text_file(const char *filename, float scale_factor) {
 
     float x_offset = 0.0f;
     float y_offset = 0.0f;
-    const float MAX_WIDTH = 100.0f;  // Max writing space
-    const float BASE_LINE_SPACING = 5.0f;  // Spacing constraint between lines (mm)
-    const float TEXT_HEIGHT = 18.0f * scale_factor;  // Scaled height of the font
-    const float LINE_SPACING = BASE_LINE_SPACING + TEXT_HEIGHT;  // New line origin includes scaling
-    const float WORD_SPACING = scale_factor * 5.0f;
+    const float MAX_WIDTH = 100.0f;
+    const float BASE_LINE_SPACING = 5.0f;
+    const float TEXT_HEIGHT = 18.0f * scale_factor;
+    const float LINE_SPACING = BASE_LINE_SPACING + TEXT_HEIGHT;
+    const float WORD_SPACING = scale_factor * 15.0f;  
     
-    DEBUG_LOG("Line spacing set to: %.3f (base: %.3f + text height: %.3f)\n", LINE_SPACING, BASE_LINE_SPACING, TEXT_HEIGHT);
-    
+    DEBUG_LOG("Line spacing set to: %.3f (base: %.3f + text height: %.3f)\n", 
+              LINE_SPACING, BASE_LINE_SPACING, TEXT_HEIGHT);
+
     char word[256];
     while (fscanf(file, "%s", word) != EOF) {
         float word_width = 0.0f;
-        
-        // Calculate word width before printing
-        for (size_t i = 0; i < strlen(word); i++) {
-            word_width += get_character_width((int)word[i], scale_factor);
-        }
-        word_width += (strlen(word) - 1) * WORD_SPACING;  // Add spacing between characters
 
-        // Check to move to next line
+        // Calculate word width using the last movement position of each character
+        for (size_t i = 0; i < strlen(word); i++) {
+            word_width += get_last_movement_x((int)word[i], scale_factor);
+        }
+
+        // Check if the word fits in the current line
         if (x_offset + word_width > MAX_WIDTH) {
             x_offset = 0.0f;
-            y_offset -= LINE_SPACING;  // Use line spacing calculation
-            DEBUG_LOG("Moving to new line at Y=%.3f\n", y_offset);
+            y_offset -= LINE_SPACING;
         }
 
         // Print each character in the word
         for (size_t i = 0; i < strlen(word); i++) {
-            if (print_gcode_for_character((int)word[i], scale_factor, x_offset, y_offset) == 0) {
-                x_offset += get_character_width((int)word[i], scale_factor);
-                if (i < strlen(word) - 1) {  // Add spacing between characters, but not after last character
-                    x_offset += WORD_SPACING;
-                }
-            }
+            print_gcode_for_character((int)word[i], scale_factor, x_offset, y_offset);
+            
+            // Update x_offset based on the last movement of the character
+            float last_x = get_last_movement_x((int)word[i], scale_factor);
+            x_offset += last_x;
         }
-        // Add space between words
+
+        // Add word spacing after each word
         x_offset += WORD_SPACING;
     }
+
     fclose(file);
+}
+
+// Get the X coordinate of the last movement
+float get_last_movement_x(int ascii_code, float scale_factor) {
+    if (ascii_code < 0 || ascii_code >= MAX_CHARACTERS || 
+        font_data[ascii_code].num_movements == 0) {
+        return 0.0f;
+    }
+    
+    // Get the last movement's X coordinate
+    int last_idx = font_data[ascii_code].num_movements - 1;
+    return font_data[ascii_code].movements[last_idx].x * scale_factor;
 }

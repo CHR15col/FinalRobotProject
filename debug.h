@@ -2,7 +2,7 @@
 #define DEBUG_H
 
 
-#define DEBUG_MODE  // Comment out to disable debugging
+//#define DEBUG_MODE  // Comment out to disable debugging
 
 #ifdef DEBUG_MODE
     #include <stdio.h>

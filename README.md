@@ -2,8 +2,12 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-  - main.c logic implemented using functions in font.c
-  - debug.h updated to carryout approprate checks throughout program
+  - after testing the program, character spacing and word spacing were the same, so i had to revise the process_text_file function to omit this
+  - after refamilliarising myself with the brief, i added a function that identifies the last movement coordinate as the x offset
+  - still in a testing and revising phase, but the core functionality is there
+
+# Next steps
+  - continue to test and revise code, updating and streamlining where possible
 
 
 # main.c outline:
