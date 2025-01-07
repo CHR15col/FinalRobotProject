@@ -26,7 +26,6 @@ extern CharacterData font_data[MAX_CHARACTERS];
 // Function prototypes
 int load_font_file(const char *filename);
 int print_gcode_for_character(int ascii_code, float scale_factor, float x_offset, float y_offset);
-float get_character_width(int ascii_code, float scale_factor);
 float get_last_movement_x(int ascii_code, float scale_factor);
 void process_text_file(const char *filename, float scale_factor);
 

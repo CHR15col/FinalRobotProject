@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <conio.h>
 #include "rs232.h"
 #include "serial.h"
 #include "font.h"
 #include "debug.h"
+
+#define bdrate 115200
 
 #define MIN_HEIGHT 4.0f
 #define MAX_HEIGHT 10.0f
@@ -105,4 +108,5 @@ void SendCommands(char *buffer) {
     PrintBuffer(buffer);
     WaitForReply();
     Sleep(100);
+    //getch();
 }

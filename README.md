@@ -2,12 +2,13 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-  - after testing the program, character spacing and word spacing were the same, so i had to revise the process_text_file function to omit this
-  - after refamilliarising myself with the brief, i added a function that identifies the last movement coordinate as the x offset
-  - still in a testing and revising phase, but the core functionality is there
+  - some good changes were implemented here, fixed the character spacing by identifying the last movement x coord and using that as the x offset
+  - this allowed character width calculation to be removed from the program 
+  - testing now shows correct starting point (-ve text height)
+  - functionality is working 
 
 # Next steps
-  - continue to test and revise code, updating and streamlining where possible
+  - streamline structure, implement better error practice
 
 
 # main.c outline:

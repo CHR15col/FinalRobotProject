@@ -107,25 +107,6 @@ int print_gcode_for_character(int ascii_code, float scale_factor, float x_offset
 }
 
 
-float get_character_width(int ascii_code, float scale_factor) {
-    if (ascii_code < 0 || ascii_code >= MAX_CHARACTERS || font_data[ascii_code].num_movements == 0) {
-        return 0.0f;
-    }
-    
-    CharacterData *char_data = &font_data[ascii_code];
-    float max_x = 0.0f;
-
-    // Find the max positive x coordinate
-    for (int i = 0; i < char_data->num_movements; i++) {
-        if (char_data->movements[i].x > max_x) {
-            max_x = (float)char_data->movements[i].x;
-        }
-    }
-
-    return max_x * scale_factor;
-}
-
-
 void process_text_file(const char *filename, float scale_factor) {
     DEBUG_PRINT_FILE(filename);
     
@@ -135,43 +116,48 @@ void process_text_file(const char *filename, float scale_factor) {
         return;
     }
 
-    float x_offset = 0.0f;
-    float y_offset = 0.0f;
-    const float MAX_WIDTH = 100.0f;
-    const float BASE_LINE_SPACING = 5.0f;
-    const float TEXT_HEIGHT = 18.0f * scale_factor;
-    const float LINE_SPACING = BASE_LINE_SPACING + TEXT_HEIGHT;
-    const float WORD_SPACING = scale_factor * 15.0f;  
+    const float TEXT_HEIGHT = 18.0f * scale_factor; 
+    const float BASE_LINE_SPACING = 5.0f;  // Base spacing between lines
+    const float LINE_SPACING = BASE_LINE_SPACING + TEXT_HEIGHT;  // Total line spacing
+    const float MAX_WIDTH = 100.0f;  
+    const float WORD_SPACING = scale_factor * 15.0f;  // Scalable space between words
     
-    DEBUG_LOG("Line spacing set to: %.3f (base: %.3f + text height: %.3f)\n", 
-              LINE_SPACING, BASE_LINE_SPACING, TEXT_HEIGHT);
+    float x_offset = 0.0f;
+    float y_offset = -TEXT_HEIGHT;  // Now start at negative text height
+    
+    DEBUG_LOG("Initial position: X=%.3f, Y=%.3f\n", x_offset, y_offset);
+    DEBUG_LOG("Text height: %.3f, Line spacing: %.3f\n", TEXT_HEIGHT, LINE_SPACING);
 
     char word[256];
     while (fscanf(file, "%s", word) != EOF) {
         float word_width = 0.0f;
 
-        // Calculate word width using the last movement position of each character
+        // Calculate word width using last movement X coordinates
         for (size_t i = 0; i < strlen(word); i++) {
-            word_width += get_last_movement_x((int)word[i], scale_factor);
+            float char_width = get_last_movement_x((int)word[i], scale_factor);
+            word_width += char_width;
         }
 
-        // Check if the word fits in the current line
+        // Check if word fits on current line
         if (x_offset + word_width > MAX_WIDTH) {
             x_offset = 0.0f;
             y_offset -= LINE_SPACING;
+            DEBUG_LOG("New line: Y=%.3f\n", y_offset);
         }
 
-        // Print each character in the word
+        // Print each character in word
         for (size_t i = 0; i < strlen(word); i++) {
             print_gcode_for_character((int)word[i], scale_factor, x_offset, y_offset);
             
-            // Update x_offset based on the last movement of the character
-            float last_x = get_last_movement_x((int)word[i], scale_factor);
-            x_offset += last_x;
+            // Update x_offset using last movement X coordinate
+            x_offset += get_last_movement_x((int)word[i], scale_factor);
+            DEBUG_LOG("Character '%c' width: %.3f, New X offset: %.3f\n", 
+                     word[i], get_last_movement_x((int)word[i], scale_factor), x_offset);
         }
 
-        // Add word spacing after each word
+        // Add word spacing
         x_offset += WORD_SPACING;
+        DEBUG_LOG("Added word spacing: %.3f, New X offset: %.3f\n", WORD_SPACING, x_offset);
     }
 
     fclose(file);
