@@ -7,18 +7,22 @@
 #include "font.h"
 #include "debug.h"
 
-#define bdrate 115200
-
+// Constants
+#define BAUD_RATE 115200
 #define MIN_HEIGHT 4.0f
 #define MAX_HEIGHT 10.0f
 
-void SendCommands(char *buffer);
+// Function prototypes
+void SendCommands (char *buffer );
+void wake_up_robot(void);
+void return_to_origin(void);
 float get_text_height(void);
 void initialize_robot(void);
+void process_text(const char *text_filename, float scale_factor);
 
 int main() {
+
     float text_height, scale_factor;
-    char buffer[100];
     char text_filename[256];
 
     DEBUG_LOG("Starting Robot Writer program\n");
@@ -27,17 +31,11 @@ int main() {
     if (CanRS232PortBeOpened() == -1) {
         DEBUG_LOG("Error: Unable to open the COM port\n");
         printf("\nUnable to open the COM port (specified in serial.h)\n");
-        return -1;
+        exit (0);
     }
 
     // Wake up the robot
-    DEBUG_LOG("Waking up robot\n");
-    printf("\nAbout to wake up the robot\n");
-    sprintf(buffer, "\n");
-    PrintBuffer(buffer);
-    Sleep(100);
-    WaitForDollar();
-    printf("\nThe robot is now ready to draw\n");
+    wake_up_robot();
 
     // Load font file
     if (load_font_file("SingleStrokeFont.txt") == -1) {
@@ -59,15 +57,11 @@ int main() {
     printf("Enter the name of the text file to process: ");
     scanf("%s", text_filename);
 
-    // Process text file
-    process_text_file(text_filename, scale_factor);
+    // Process the text file
+    process_text(text_filename, scale_factor);
 
     // Return to origin and pen up before finishing
-    DEBUG_LOG("Returning to origin\n");
-    sprintf(buffer, "S0\n");
-    SendCommands(buffer);
-    sprintf(buffer, "G0 X0 Y0\n");
-    SendCommands(buffer);
+    return_to_origin();
 
     // Close the COM port
     CloseRS232Port();
@@ -76,6 +70,40 @@ int main() {
     return 0;
 }
 
+/**
+ * Wakes up the robot by sending an initial command.
+ */
+void wake_up_robot(void) {
+    char buffer[100];
+    DEBUG_LOG("Waking up robot\n");
+    printf("\nAbout to wake up the robot\n");
+
+    sprintf(buffer, "\n");
+    PrintBuffer(&buffer[0]);
+    Sleep(100);
+    WaitForDollar();
+
+    printf("\nThe robot is now ready to draw\n");
+}
+
+/**
+ * Returns the robot to the origin (0, 0) and lifts the pen.
+ */
+void return_to_origin(void) {
+    char buffer[100];
+    DEBUG_LOG("Returning to origin\n");
+
+    sprintf(buffer, "S0\n"); // Pen up
+    SendCommands(buffer);
+
+    sprintf(buffer, "G0 X0 Y0\n"); // Move to origin
+    SendCommands(buffer);
+}
+
+/**
+ * Prompts the user to enter a valid text height and returns it.
+ * @return The text height entered by the user.
+ */
 float get_text_height(void) {
     float height;
     do {
@@ -91,22 +119,35 @@ float get_text_height(void) {
     return height;
 }
 
+/**
+ * Initializes the robot by setting the pen to the starting position.
+ */
 void initialize_robot(void) {
     char buffer[100];
     DEBUG_LOG("Initializing robot\n");
-    
-    sprintf(buffer, "G1 X0 Y0 F1000\n");
+
+    sprintf(buffer, "G1 X0 Y0 F1000\n"); // Move to origin at a safe speed
     SendCommands(buffer);
-    sprintf(buffer, "M3\n");
+    sprintf(buffer, "M3\n"); // Enable spindle (pen down)
     SendCommands(buffer);
-    sprintf(buffer, "S0\n");
+    sprintf(buffer, "S0\n"); // Pen up
     SendCommands(buffer);
 }
 
-void SendCommands(char *buffer) {
-    DEBUG_LOG("Sending command: %s", buffer);
-    PrintBuffer(buffer);
+/**
+ * Processes the text file and sends G-code commands to the robot.
+ * @param text_filename The name of the text file to process.
+ * @param scale_factor The scale factor for the text size.
+ */
+void process_text(const char *text_filename, float scale_factor) {
+    DEBUG_LOG("Processing text file: %s\n", text_filename);
+    process_text_file(text_filename, scale_factor);
+}
+
+void SendCommands (char *buffer )
+{
+    PrintBuffer (&buffer[0]);
     WaitForReply();
-    Sleep(100);
-    //getch();
+    //Sleep(100); // Can omit this when using the writing robot but has minimal effect
+    // getch(); // Omit this once basic testing with emulator has taken place
 }

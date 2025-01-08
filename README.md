@@ -2,13 +2,11 @@
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
 # Current Status
-  - some good changes were implemented here, fixed the character spacing by identifying the last movement x coord and using that as the x offset
-  - this allowed character width calculation to be removed from the program 
-  - testing now shows correct starting point (-ve text height)
-  - functionality is working 
+  - structural improvements made, increasing the programs modularity by splitting large functions into smaller helper functions
+  - clear notation has been made for better practice, including function, briefing and parameter comments for better understanding 
 
 # Next steps
-  - streamline structure, implement better error practice
+  - system manual and project overview
 
 
 # main.c outline:
@@ -53,8 +51,8 @@ A[Start] --> B[Load font file]
   1. Load font data from file
      2. Initiallise all characters with 0 movements
      3. Read file by line
-        4. Check for header line (999)
-           5. Read movement lines for character
+        4. Check for header line (999) and store character info
+           5. Read movement lines for character and store movement info
   6. Close file
 
 ## Generate G-code for character (including debugging):
