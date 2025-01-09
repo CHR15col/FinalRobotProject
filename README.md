@@ -1,89 +1,139 @@
 # Robot Writer v6 Project
 Computer Engineering and Mechatronics project for controlling a writing robot.
 
-# Current Status
-  - structural improvements made, increasing the programs modularity by splitting large functions into smaller helper functions
-  - clear notation has been made for better practice, including function, briefing and parameter comments for better understanding 
-
-# Next steps
-  - system manual and project overview
 
 
-# main.c outline:
-## Initialisation:
-  - Initialise any required variables and settings
-  - Include debug.h
+# System Manual:
+## Key Features:
+  - Text height configuration (4.0mm - 10.0mm)
+  - Serial communication with robot (115200 baud rate)
+  - Single-stroke font processing
+  - Automated text-to-G-code conversion
 
-## Load Font File:
-  - Attempts to load the font file (SingleStrokeFont.txt) using the load_font_file function
-  - If the font file cannot be loaded, the program exits with an error message
+## Sample Output:
+  - When running, the program:
 
-## User Input for Text Height:
-  - The user is prompted to input the desired text height (in mm)
-  - The input is validated to ensure it falls within the allowed range (4mm to 10mm)
-  - The scale factor is calculated based on the ratio of the input height to the default font height (18 units)
+  - Initializes serial communication
+  - Prompts for text height
+  - Requests text file name
+  - Processes text and sends commands to robot
+  - Returns to origin upon completion
+
+## File Description:
+main.c
+  - Primary control file containing program entry point and core control functions:
+
+  - Program initialization
+  - User interaction
+  - Robot control sequence
+  - Serial communication handling
+
+- Configuration points:
+
+  - BAUD_RATE: Serial communication speed (default: 115200)
+  - MIN_HEIGHT/MAX_HEIGHT: Text height limits (4.0mm - 10.0mm)
 
 ## Process Text File:
   - The program processes the input text file (Test.txt) using the process_text_file function
   - Handles word wrapping, line spacing, and G-code generation for the robot
   - After processing and G-code generation, return the pen to origin (0,0), pen-up 
 
-# main.c flowchart:
+## Function Declaration:
+int main():
+  - Purpose: Program entry point and main control flow
+  - Parameters: None
+  - Returns: 0 on success, -1 on failure
+  - Description: Orchestrates the entire program flow
 
-A[Start] --> B[Load font file]
-    B --> C{Font file loaded?}
-    C -- No --> D[Exit with error]
-    C -- Yes --> E[Prompt user for text height]
-    E --> F{Valid height?}
-    F -- No --> G[Exit with error]
-    F -- Yes --> H[Calculate scale factor]
-    H --> I[Process text file]
-    I --> J[Return pen to origin]
-    J --> K[Print completion message]
-    K --> L[Exit]
+void wake_up_robot(void)
+  - Purpose: Initializes robot communication
+  - Parameters: None
+  - Returns: void
+  - Description: Sends initial commands to prepare robot
 
+void return_to_origin(void)
+  - Purpose: Resets robot position
+  - Parameters: None
+  - Returns: void
+  - Description: Moves robot to (0,0) with pen up
 
+float get_text_height(void)
+  - Purpose: User input handler for text height
+  - Parameters: None
+  - Returns: float (validated text height)
+  - Description: Prompts and validates user height input
 
-# font.c outline:
-  - Declare global array function - font_data[]
+void initialize_robot(void)
+  - Purpose: Sets initial robot state
+  - Parameters: None
+  - Returns: void
+  - Description: Configures initial position, pen state and spindle
 
-## Font Parsing (including debugging):
-  1. Load font data from file
-     2. Initiallise all characters with 0 movements
-     3. Read file by line
-        4. Check for header line (999) and store character info
-           5. Read movement lines for character and store movement info
-  6. Close file
+void process_text(const char *text_filename, float scale_factor)
+  - Purpose: Text processing controller
+  - Parameters:
+    - text_filename (input): File to process
+    - scale_factor (input): Scaling value for text size
+  - Returns: void
+  - Description: Manages text file processing
 
-## Generate G-code for character (including debugging):
-  1. define print_gcode_for_character() 
-     2. Identify character ASCII number
-     3. Identify scale factor and offsets
-        4. Change pen state if needed
-        5. Move to position
-  6. End
+void SendCommands(char *buffer)
+  - Purpose: Robot command transmission
+  - Parameters:
+   - buffer (input): Command string to send
+  - Returns: void
+  - Description: Handles command transmission and acknowledgment
 
-## Calculate scaled character width
-  1. Check if ASCII code is within valid range 
-    2. Return 0 if invalid
-  3. Iterate through all movements for the character
-    4. Track maximum x-coordinate reached
-    5. Scale the x-coordinates using scale_factor
-      6. Return the maximum scaled x-coordinate
+## Data Structures:
+Local Variables
+  - text_height (float): Stores user-specified text height
+  - scale_factor (float): Calculated scaling value for font
+  - text_filename (char[256]): Stores input file name
+  - buffer (char[100]): Command string buffer
 
-## text file processing
-  1. Open text file
-  2. Set up positioning variables and constants
-  3. Calculate line spacing based on text height
-  4. Read word by word from file
-    5. Calculate total width of current word
-    6. Check if word fits on current line
-      7. Handle line wrapping if needed
-  8. Process each character in the word
-    9. Generate G-code for each character
-    10. Update x offset for character spacing
-  11. Add word spacing after each word
+## Debug Mode (toggle in debug.h)
+When DEBUG is defined (debug.h):
+  - Outputs detailed logging via DEBUG_LOG
+  - Provides execution trace information
+  - Shows command transmission details
 
-  
-## Next Steps
-streamline code where possible
+## Serial Mode (toggle in serial.c)
+  - Controls robot communication
+  - Manages command transmission and acknowledgment
+  - Handles timing and synchronization
+
+## Configuration Notes
+  - Serial port settings defined in serial.h
+  - Debug output controlled by debug.h
+  - Font configuration in font.h
+  - Timing parameters can be adjusted in SendCommands()
+
+This manual provides essential information for maintaining and developing the Robot Writer system. For implementation of font handling and text processing information, refer to the font.c and font.h documentation.
+
+# Program logic flow:
+Serial_Mode - ON
+
+|-- Initialise Robot
+        - Wake up robot
+        - Set initial state (pen up, origin position)
+    - Get User Input
+        - Prompt for text height
+        - Prompt for text file name
+    - Load Font Data
+        - Open font file
+        - Validate font file format
+        - Store character movements in memory
+    - Process Text File
+        - Open text file
+        - Read word by word
+           - Calculate word width
+              - Update print position (handle line wrapping)
+              - Print word
+                    - Generate G-code for each character
+                    - Scale and position character
+                    - Send G-code to robot
+    - Return to Origin
+        - Move robot to (0,0) with pen up
+    - End Program
+        - Close files and terminate
+
